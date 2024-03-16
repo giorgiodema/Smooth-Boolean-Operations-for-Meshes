@@ -80,23 +80,31 @@ if __name__=="__main__":
 
     TEST = 1
 
-    if TEST == 0:
+    if TEST == 1:
         m1 = pymesh.load_mesh("monkey.obj")
         m2 = pymesh.load_mesh("monkey.obj")
         m2 = pymesh.form_mesh(m2.vertices + [[1.0,0.,0.]],m2.faces)
         u = union(m1,m2,128)
         su = smoothUnion(m1,m2,0.2,128)
+        su1 = smoothUnion(m1,m2,0.4,128)
+        su2 = smoothUnion(m1,m2,0.6,128)
         pymesh.save_mesh("tmp/01u.obj",u)
         pymesh.save_mesh("tmp/01su.obj",su)
+        pymesh.save_mesh("tmp/01su1.obj",su1)
+        pymesh.save_mesh("tmp/01su2.obj",su2)
 
-    if TEST == 1:
+    if TEST == 2:
         m1 = pymesh.load_mesh("sphere.obj")
         m2 = pymesh.load_mesh("cube.obj")
         m2 = pymesh.form_mesh(m2.vertices + [[1.0,0.,0.]],m2.faces)
         u = union(m1,m2,128)
         su = smoothUnion(m1,m2,0.2,128)
+        su1 = smoothUnion(m1,m2,0.4,128)
+        su2 = smoothUnion(m1,m2,0.6,128)
         pymesh.save_mesh("tmp/02u.obj",u)
-        pymesh.save_mesh("tmp/02su.obj",su)  
+        pymesh.save_mesh("tmp/02su.obj",su) 
+        pymesh.save_mesh("tmp/02su1.obj",su1)
+        pymesh.save_mesh("tmp/02su2.obj",su2)  
 
     if TEST == 10:
         res = 64
