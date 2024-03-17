@@ -3,7 +3,9 @@ import numpy as np
 import skimage
 from typing import Tuple,List
 
-
+##
+#   Auxiliary functions
+##
 def _computeAABB(meshes:List[pymesh.Mesh])->Tuple[int]:
     v = meshes[0].vertices
     for m in meshes[1:]:
@@ -54,6 +56,17 @@ def _smoothIntersection(sdf1:np.ndarray,sdf2:np.ndarray,smoothness:float)->np.nd
 # Non Smooth Boolean Operations
 ##
 def union(m1:pymesh.Mesh,m2:pymesh.Mesh,resolution:int,pad:float=1.0)->pymesh.Mesh:
+    """
+    Compute the union between two meshes
+    Parameters:
+    m1 (pymesh.Mesh): The first operand
+    m2 (pymesh.Mesh): The second operand
+    resolution (int): The resolution of the volumetric grid
+    pad (float): Add padding to the original grid
+
+    Returns:
+    pymesh.Mesh: The result of the boolean operation
+    """
     aabb = _computeAABB([m1,m2])
     sdf1,_ = _makeSDFGrid(m1,resolution,aabb,pad=pad)
     sdf2,_ = _makeSDFGrid(m2,resolution,aabb,pad=pad)
@@ -71,6 +84,17 @@ def union(m1:pymesh.Mesh,m2:pymesh.Mesh,resolution:int,pad:float=1.0)->pymesh.Me
     return mesh
 
 def subtraction(m1:pymesh.Mesh,m2:pymesh.Mesh,resolution:int,pad:float=1.0)->pymesh.Mesh:
+    """
+    Compute the difference between two meshes (m2 - m1)
+    Parameters:
+    m1 (pymesh.Mesh): The first operand
+    m2 (pymesh.Mesh): The second operand
+    resolution (int): The resolution of the volumetric grid
+    pad (float): Add padding to the original grid
+
+    Returns:
+    pymesh.Mesh: The result of the boolean operation
+    """
     aabb = _computeAABB([m1,m2])
     sdf1,_ = _makeSDFGrid(m1,resolution,aabb,pad=pad)
     sdf2,_ = _makeSDFGrid(m2,resolution,aabb,pad=pad)
@@ -88,6 +112,17 @@ def subtraction(m1:pymesh.Mesh,m2:pymesh.Mesh,resolution:int,pad:float=1.0)->pym
     return mesh
 
 def intersection(m1:pymesh.Mesh,m2:pymesh.Mesh,resolution:int,pad:float=1.0)->pymesh.Mesh:
+    """
+    Compute the intersection between two meshes
+    Parameters:
+    m1 (pymesh.Mesh): The first operand
+    m2 (pymesh.Mesh): The second operand
+    resolution (int): The resolution of the volumetric grid
+    pad (float): Add padding to the original grid
+
+    Returns:
+    pymesh.Mesh: The result of the boolean operation
+    """
     aabb = _computeAABB([m1,m2])
     sdf1,_ = _makeSDFGrid(m1,resolution,aabb,pad=pad)
     sdf2,_ = _makeSDFGrid(m2,resolution,aabb,pad=pad)
@@ -108,6 +143,18 @@ def intersection(m1:pymesh.Mesh,m2:pymesh.Mesh,resolution:int,pad:float=1.0)->py
 # Smooth Boolean Operations
 ##
 def smoothUnion(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution:int,pad:float=10.0)->pymesh.Mesh:
+    """
+    Compute the smooth union between two meshes
+    Parameters:
+    m1 (pymesh.Mesh): The first operand
+    m2 (pymesh.Mesh): The second operand
+    smoothness (float): The amount of smoothness in actual distance units
+    resolution (int): The resolution of the volumetric grid
+    pad (float): Add padding to the original grid
+
+    Returns:
+    pymesh.Mesh: The result of the boolean operation
+    """
     aabb = _computeAABB([m1,m2])
     sdf1,_ = _makeSDFGrid(m1,resolution,aabb,pad=pad)
     sdf2,_ = _makeSDFGrid(m2,resolution,aabb,pad=pad)
@@ -125,6 +172,18 @@ def smoothUnion(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution:int,pa
     return mesh
 
 def smoothSubtraction(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution:int,pad:float=10.0)->pymesh.Mesh:
+    """
+    Compute the smooth difference between two meshes
+    Parameters:
+    m1 (pymesh.Mesh): The first operand
+    m2 (pymesh.Mesh): The second operand
+    smoothness (float): The amount of smoothness in actual distance units
+    resolution (int): The resolution of the volumetric grid
+    pad (float): Add padding to the original grid
+
+    Returns:
+    pymesh.Mesh: The result of the boolean operation
+    """
     aabb = _computeAABB([m1,m2])
     sdf1,_ = _makeSDFGrid(m1,resolution,aabb,pad=pad)
     sdf2,_ = _makeSDFGrid(m2,resolution,aabb,pad=pad)
@@ -142,6 +201,18 @@ def smoothSubtraction(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution:
     return mesh
 
 def smoothIntersection(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution:int,pad:float=10.0)->pymesh.Mesh:
+    """
+    Compute the smooth intersection between two meshes
+    Parameters:
+    m1 (pymesh.Mesh): The first operand
+    m2 (pymesh.Mesh): The second operand
+    smoothness (float): The amount of smoothness in actual distance units
+    resolution (int): The resolution of the volumetric grid
+    pad (float): Add padding to the original grid
+
+    Returns:
+    pymesh.Mesh: The result of the boolean operation
+    """
     aabb = _computeAABB([m1,m2])
     sdf1,_ = _makeSDFGrid(m1,resolution,aabb,pad=pad)
     sdf2,_ = _makeSDFGrid(m2,resolution,aabb,pad=pad)
@@ -159,6 +230,17 @@ def smoothIntersection(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution
     return mesh
 
 def round(m:pymesh.Mesh,roundness:float,resolution:int,pad:float=10.0)->pymesh.Mesh:
+    """
+    Compute a rounded version of the original mesh
+    Parameters:
+    m (pymesh.Mesh): The input mesh
+    roundness (float): The amount of roundness in actual distance units
+    resolution (int): The resolution of the volumetric grid
+    pad (float): Add padding to the original grid
+
+    Returns:
+    pymesh.Mesh: The rounded mesh
+    """
     aabb = _computeAABB([m])
     sdf,_ = _makeSDFGrid(m,resolution,aabb,pad)
     ox = pad * (aabb[1]-aabb[0])/resolution
@@ -172,78 +254,3 @@ def round(m:pymesh.Mesh,roundness:float,resolution:int,pad:float=10.0)->pymesh.M
     verts,faces,_,_ = skimage.measure.marching_cubes(sdf,level=roundness,spacing=spacing)
     mesh = pymesh.form_mesh(verts,faces)
     return mesh
-
-
-if __name__=="__main__":
-    import matplotlib.pyplot as plt
-
-    TEST = 2
-
-    if TEST == 1:
-        m1 = pymesh.load_mesh("monkey.obj")
-        m2 = pymesh.load_mesh("monkey.obj")
-        m2 = pymesh.form_mesh(m2.vertices + [[1.0,0.,0.]],m2.faces)
-        u = union(m1,m2,128)
-        su = smoothUnion(m1,m2,0.2,128)
-        su1 = smoothUnion(m1,m2,0.4,128)
-        su2 = smoothUnion(m1,m2,0.6,128)
-        pymesh.save_mesh("tmp/01u.obj",u)
-        pymesh.save_mesh("tmp/01su.obj",su)
-        pymesh.save_mesh("tmp/01su1.obj",su1)
-        pymesh.save_mesh("tmp/01su2.obj",su2)
-
-    if TEST == 2:
-        m1 = pymesh.load_mesh("sphere.obj")
-        m2 = pymesh.load_mesh("cube.obj")
-        m2 = pymesh.form_mesh(m2.vertices + [[1.0,0.,0.]],m2.faces)
-        u = union(m1,m2,128)
-        su = smoothUnion(m1,m2,0.2,128)
-        su1 = smoothUnion(m1,m2,0.4,128)
-        su2 = smoothUnion(m1,m2,0.6,128)
-        pymesh.save_mesh("tmp/02u.obj",u)
-        pymesh.save_mesh("tmp/02su.obj",su) 
-        pymesh.save_mesh("tmp/02su1.obj",su1)
-        pymesh.save_mesh("tmp/02su2.obj",su2)  
-
-    if TEST == 10:
-        res = 64
-        m = pymesh.load_mesh("cube.obj")
-        aabb = _computeAABB([m])
-        sdists,points = _makeSDFGrid(m,res,aabb)
-        sdists = np.reshape(sdists,(res**3,1))
-        surface = points[np.abs(sdists[:,0])<=0.1]
-        # Create a new matplotlib figure and its axes
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        # Scatter plot
-        ax.scatter(surface[:,0], surface[:,1], surface[:,2])
-        # Set labels for axes
-        ax.set_xlabel('X Label')
-        ax.set_ylabel('Y Label')
-        ax.set_zlabel('Z Label')
-        # Show the plot
-        plt.show()
-
-    if TEST == 12:
-        res = 128
-        m = pymesh.load_mesh("cube.obj")
-        aabb = _computeAABB([m])
-        sdf,points = _makeSDFGrid(m,res,aabb)
-        spacing = (
-            (aabb[1]-aabb[0])/res,
-            (aabb[3]-aabb[2])/res,
-            (aabb[5]-aabb[4])/res
-        )
-        level = 0.5 * (sdf.min() + sdf.max())
-        verts,faces,_,_ = skimage.measure.marching_cubes(sdf,level=0.0,spacing=spacing)
-        mesh = pymesh.form_mesh(verts,faces)
-        pymesh.save_mesh("tmp/cube_rec.obj",mesh)
-
-    if TEST == 13:
-        res = 128
-        m = pymesh.load_mesh("bunny_big.obj")
-        aabb = _computeAABB([m])
-        sdf,points = _makeSDFGrid(m,res,aabb)
-        plt.imshow(sdf[:,:,res//2],cmap="viridis")
-        plt.colorbar()
-        plt.show()
