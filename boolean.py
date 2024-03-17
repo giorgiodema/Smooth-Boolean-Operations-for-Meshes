@@ -16,10 +16,10 @@ def _computeAABB(meshes:List[pymesh.Mesh])->Tuple[int]:
     maxz = np.max(v[:,2])
     return (minx,maxx,miny,maxy,minz,maxz)
 
-def _makeSDFGrid(m:pymesh.Mesh,resolution:int,aabb:Tuple[int])->np.ndarray:
-    ox = 10.0 * (aabb[1]-aabb[0])/resolution
-    oy = 10.0 * (aabb[3]-aabb[2])/resolution
-    oz = 10.0 * (aabb[5]-aabb[4])/resolution
+def _makeSDFGrid(m:pymesh.Mesh,resolution:int,aabb:Tuple[int],pad:float=0.0)->np.ndarray:
+    ox = pad * (aabb[1]-aabb[0])/resolution
+    oy = pad * (aabb[3]-aabb[2])/resolution
+    oz = pad * (aabb[5]-aabb[4])/resolution
     x = np.linspace(aabb[0]-ox,aabb[1]+ox,resolution)
     y = np.linspace(aabb[2]-oy,aabb[3]+oy,resolution)
     z = np.linspace(aabb[4]-oz,aabb[5]+oz,resolution)
@@ -32,38 +32,35 @@ def _makeSDFGrid(m:pymesh.Mesh,resolution:int,aabb:Tuple[int])->np.ndarray:
     sdf = np.reshape(sdf,(resolution,resolution,resolution))
     return sdf,points
 
-
 def _smoothUnion(sdf1:np.ndarray,sdf2:np.ndarray,smoothness:float)->np.ndarray:
     h = np.clip(0.5 + 0.5*(sdf2-sdf1)/smoothness,0.,1.)
     interp = sdf2 * (1. - h) + sdf1 * h
     res = interp - smoothness * h * (1.-h)
     return res
 
-def smoothUnion(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution:float)->pymesh.Mesh:
-    aabb = _computeAABB([m1,m2])
-    sdf1,_ = _makeSDFGrid(m1,resolution,aabb)
-    sdf2,_ = _makeSDFGrid(m2,resolution,aabb)
-    sdf = _smoothUnion(sdf1,sdf2,smoothness)
-    ox = 10.0 * (aabb[1]-aabb[0])/resolution
-    oy = 10.0 * (aabb[3]-aabb[2])/resolution
-    oz = 10.0 * (aabb[5]-aabb[4])/resolution
-    spacing = (
-        (aabb[1]-aabb[0] + 2*ox)/resolution,
-        (aabb[3]-aabb[2] + 2*oy)/resolution,
-        (aabb[5]-aabb[4] + 2*oz)/resolution
-    )
-    verts,faces,_,_ = skimage.measure.marching_cubes(sdf,level=0.,spacing=spacing)
-    mesh = pymesh.form_mesh(verts,faces)
-    return mesh
+def _smoothSubtraction(sdf1:np.ndarray,sdf2:np.ndarray,smoothness:float)->np.ndarray:
+    h = np.clip(0.5 - 0.5*(sdf2+sdf1)/smoothness,0.,1.)
+    interp = sdf2 * (1. - h) - sdf1 * h
+    res = interp + smoothness * h * (1.-h)
+    return res
 
-def union(m1:pymesh.Mesh,m2:pymesh.Mesh,resolution:float)->pymesh.Mesh:
+def _smoothIntersection(sdf1:np.ndarray,sdf2:np.ndarray,smoothness:float)->np.ndarray:
+    h = np.clip(0.5 - 0.5*(sdf2-sdf1)/smoothness,0.,1.)
+    interp = sdf2 * (1. - h) + sdf1 * h
+    res = interp + smoothness * h * (1.-h)
+    return res
+
+##
+# Non Smooth Boolean Operations
+##
+def union(m1:pymesh.Mesh,m2:pymesh.Mesh,resolution:int,pad:float=1.0)->pymesh.Mesh:
     aabb = _computeAABB([m1,m2])
-    sdf1,_ = _makeSDFGrid(m1,resolution,aabb)
-    sdf2,_ = _makeSDFGrid(m2,resolution,aabb)
+    sdf1,_ = _makeSDFGrid(m1,resolution,aabb,pad=pad)
+    sdf2,_ = _makeSDFGrid(m2,resolution,aabb,pad=pad)
     sdf = np.minimum(sdf1,sdf2)
-    ox = 10.0 * (aabb[1]-aabb[0])/resolution
-    oy = 10.0 * (aabb[3]-aabb[2])/resolution
-    oz = 10.0 * (aabb[5]-aabb[4])/resolution
+    ox = pad * (aabb[1]-aabb[0])/resolution
+    oy = pad * (aabb[3]-aabb[2])/resolution
+    oz = pad * (aabb[5]-aabb[4])/resolution
     spacing = (
         (aabb[1]-aabb[0]+2*ox)/resolution,
         (aabb[3]-aabb[2]+2*oy)/resolution,
@@ -73,12 +70,99 @@ def union(m1:pymesh.Mesh,m2:pymesh.Mesh,resolution:float)->pymesh.Mesh:
     mesh = pymesh.form_mesh(verts,faces)
     return mesh
 
+def subtraction(m1:pymesh.Mesh,m2:pymesh.Mesh,resolution:int,pad:float=1.0)->pymesh.Mesh:
+    aabb = _computeAABB([m1,m2])
+    sdf1,_ = _makeSDFGrid(m1,resolution,aabb,pad=pad)
+    sdf2,_ = _makeSDFGrid(m2,resolution,aabb,pad=pad)
+    sdf = np.maximum(-sdf1,sdf2)
+    ox = pad * (aabb[1]-aabb[0])/resolution
+    oy = pad * (aabb[3]-aabb[2])/resolution
+    oz = pad * (aabb[5]-aabb[4])/resolution
+    spacing = (
+        (aabb[1]-aabb[0]+2*ox)/resolution,
+        (aabb[3]-aabb[2]+2*oy)/resolution,
+        (aabb[5]-aabb[4]+2*oz)/resolution
+    )
+    verts,faces,_,_ = skimage.measure.marching_cubes(sdf,level=0.,spacing=spacing)
+    mesh = pymesh.form_mesh(verts,faces)
+    return mesh
+
+def intersection(m1:pymesh.Mesh,m2:pymesh.Mesh,resolution:int,pad:float=1.0)->pymesh.Mesh:
+    aabb = _computeAABB([m1,m2])
+    sdf1,_ = _makeSDFGrid(m1,resolution,aabb,pad=pad)
+    sdf2,_ = _makeSDFGrid(m2,resolution,aabb,pad=pad)
+    sdf = np.maximum(sdf1,sdf2)
+    ox = pad * (aabb[1]-aabb[0])/resolution
+    oy = pad * (aabb[3]-aabb[2])/resolution
+    oz = pad * (aabb[5]-aabb[4])/resolution
+    spacing = (
+        (aabb[1]-aabb[0]+2*ox)/resolution,
+        (aabb[3]-aabb[2]+2*oy)/resolution,
+        (aabb[5]-aabb[4]+2*oz)/resolution
+    )
+    verts,faces,_,_ = skimage.measure.marching_cubes(sdf,level=0.,spacing=spacing)
+    mesh = pymesh.form_mesh(verts,faces)
+    return mesh
+
+##
+# Smooth Boolean Operations
+##
+def smoothUnion(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution:float,pad:float=10.0)->pymesh.Mesh:
+    aabb = _computeAABB([m1,m2])
+    sdf1,_ = _makeSDFGrid(m1,resolution,aabb,pad=pad)
+    sdf2,_ = _makeSDFGrid(m2,resolution,aabb,pad=pad)
+    sdf = _smoothUnion(sdf1,sdf2,smoothness)
+    ox = pad * (aabb[1]-aabb[0])/resolution
+    oy = pad * (aabb[3]-aabb[2])/resolution
+    oz = pad * (aabb[5]-aabb[4])/resolution
+    spacing = (
+        (aabb[1]-aabb[0] + 2*ox)/resolution,
+        (aabb[3]-aabb[2] + 2*oy)/resolution,
+        (aabb[5]-aabb[4] + 2*oz)/resolution
+    )
+    verts,faces,_,_ = skimage.measure.marching_cubes(sdf,level=0.,spacing=spacing)
+    mesh = pymesh.form_mesh(verts,faces)
+    return mesh
+
+def smoothSubtraction(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution:float,pad:float=10.0)->pymesh.Mesh:
+    aabb = _computeAABB([m1,m2])
+    sdf1,_ = _makeSDFGrid(m1,resolution,aabb,pad=pad)
+    sdf2,_ = _makeSDFGrid(m2,resolution,aabb,pad=pad)
+    sdf = _smoothSubtraction(sdf1,sdf2,smoothness)
+    ox = pad * (aabb[1]-aabb[0])/resolution
+    oy = pad * (aabb[3]-aabb[2])/resolution
+    oz = pad * (aabb[5]-aabb[4])/resolution
+    spacing = (
+        (aabb[1]-aabb[0] + 2*ox)/resolution,
+        (aabb[3]-aabb[2] + 2*oy)/resolution,
+        (aabb[5]-aabb[4] + 2*oz)/resolution
+    )
+    verts,faces,_,_ = skimage.measure.marching_cubes(sdf,level=0.,spacing=spacing)
+    mesh = pymesh.form_mesh(verts,faces)
+    return mesh
+
+def smoothIntersection(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution:float,pad:float=10.0)->pymesh.Mesh:
+    aabb = _computeAABB([m1,m2])
+    sdf1,_ = _makeSDFGrid(m1,resolution,aabb,pad=pad)
+    sdf2,_ = _makeSDFGrid(m2,resolution,aabb,pad=pad)
+    sdf = _smoothIntersection(sdf1,sdf2,smoothness)
+    ox = pad * (aabb[1]-aabb[0])/resolution
+    oy = pad * (aabb[3]-aabb[2])/resolution
+    oz = pad * (aabb[5]-aabb[4])/resolution
+    spacing = (
+        (aabb[1]-aabb[0] + 2*ox)/resolution,
+        (aabb[3]-aabb[2] + 2*oy)/resolution,
+        (aabb[5]-aabb[4] + 2*oz)/resolution
+    )
+    verts,faces,_,_ = skimage.measure.marching_cubes(sdf,level=0.,spacing=spacing)
+    mesh = pymesh.form_mesh(verts,faces)
+    return mesh
 
 
 if __name__=="__main__":
     import matplotlib.pyplot as plt
 
-    TEST = 1
+    TEST = 2
 
     if TEST == 1:
         m1 = pymesh.load_mesh("monkey.obj")
