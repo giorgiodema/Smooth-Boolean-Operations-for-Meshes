@@ -1,5 +1,5 @@
 # Smooth Boolean Operations for Meshes
-This repo introduces an innovative approach to compute boolean operations on meshes (union, intersection and difference). Unlike traditional methods, our approach offers smooth variants of the boolean operations and supports non-watertight meshes. It works by converting meshes into Signed Distance Fields (SDFs) represented as volume grids, facilitating boolean operations in this alternative representation. The smooth boolean operations are adapted from techniques shared by Íñigo Quílez on his website, specifically tailored for implicit functions represented as SDFs.
+This repo introduces an innovative approach to compute boolean operations on meshes (union, intersection and difference). Unlike traditional methods, our approach offers smooth variants of the boolean operations and supports non-watertight meshes. It works by converting meshes into Signed Distance Fields (SDFs) represented as volume grids, facilitating boolean operations in this alternative representation. The smooth boolean operations are adapted from techniques shared by Íñigo Quílez on his [website](https://iquilezles.org/articles/distfunctions/), specifically tailored for implicit functions represented as SDFs.
 
 ## Boolean Operations
 
