@@ -107,7 +107,7 @@ def intersection(m1:pymesh.Mesh,m2:pymesh.Mesh,resolution:int,pad:float=1.0)->py
 ##
 # Smooth Boolean Operations
 ##
-def smoothUnion(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution:float,pad:float=10.0)->pymesh.Mesh:
+def smoothUnion(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution:int,pad:float=10.0)->pymesh.Mesh:
     aabb = _computeAABB([m1,m2])
     sdf1,_ = _makeSDFGrid(m1,resolution,aabb,pad=pad)
     sdf2,_ = _makeSDFGrid(m2,resolution,aabb,pad=pad)
@@ -124,7 +124,7 @@ def smoothUnion(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution:float,
     mesh = pymesh.form_mesh(verts,faces)
     return mesh
 
-def smoothSubtraction(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution:float,pad:float=10.0)->pymesh.Mesh:
+def smoothSubtraction(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution:int,pad:float=10.0)->pymesh.Mesh:
     aabb = _computeAABB([m1,m2])
     sdf1,_ = _makeSDFGrid(m1,resolution,aabb,pad=pad)
     sdf2,_ = _makeSDFGrid(m2,resolution,aabb,pad=pad)
@@ -141,7 +141,7 @@ def smoothSubtraction(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution:
     mesh = pymesh.form_mesh(verts,faces)
     return mesh
 
-def smoothIntersection(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution:float,pad:float=10.0)->pymesh.Mesh:
+def smoothIntersection(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution:int,pad:float=10.0)->pymesh.Mesh:
     aabb = _computeAABB([m1,m2])
     sdf1,_ = _makeSDFGrid(m1,resolution,aabb,pad=pad)
     sdf2,_ = _makeSDFGrid(m2,resolution,aabb,pad=pad)
@@ -155,6 +155,21 @@ def smoothIntersection(m1:pymesh.Mesh,m2:pymesh.Mesh,smoothness:float,resolution
         (aabb[5]-aabb[4] + 2*oz)/resolution
     )
     verts,faces,_,_ = skimage.measure.marching_cubes(sdf,level=0.,spacing=spacing)
+    mesh = pymesh.form_mesh(verts,faces)
+    return mesh
+
+def round(m:pymesh.Mesh,roundness:float,resolution:int,pad:float=10.0)->pymesh.Mesh:
+    aabb = _computeAABB([m])
+    sdf,_ = _makeSDFGrid(m,resolution,aabb,pad)
+    ox = pad * (aabb[1]-aabb[0])/resolution
+    oy = pad * (aabb[3]-aabb[2])/resolution
+    oz = pad * (aabb[5]-aabb[4])/resolution
+    spacing = (
+        (aabb[1]-aabb[0] + 2*ox)/resolution,
+        (aabb[3]-aabb[2] + 2*oy)/resolution,
+        (aabb[5]-aabb[4] + 2*oz)/resolution
+    )
+    verts,faces,_,_ = skimage.measure.marching_cubes(sdf,level=roundness,spacing=spacing)
     mesh = pymesh.form_mesh(verts,faces)
     return mesh
 
