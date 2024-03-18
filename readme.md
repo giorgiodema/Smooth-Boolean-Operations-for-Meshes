@@ -6,6 +6,7 @@ This repo introduces an innovative approach to compute boolean operations on mes
 In the subsequent sections, we compare traditional boolean operations with their smooth counterparts, varying the degree of smoothness through the smoothness parameter. This parameter dictates the extent of the smooth transition between two primitives, measured in actual distance units. Initially, boolean operations compute an axis-aligned bounding box that encapsulates both operands to maintain their relative positions. This box is divided into a grid, the resolution of which is determined by the resolution parameter. While higher resolutions capture more detail, they also increase computation time. Additionally, the pad parameter indicates the amount of padding added to each dimension of the grid, essential for some smooth operations where the resultant mesh slightly exceeds the size of the original meshes.
 
 The code examples below demonstrate how to perform basic and smooth boolean operations, leveraging the smoothness parameter to control the outcome's smoothness level.
+
 ### Prerequisites
 - pymesh2==0.3
 - Meshes should be in Wavefront obj format, located in the data folder.
