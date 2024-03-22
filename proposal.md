@@ -51,16 +51,16 @@ The interface of the `Rounding` modifier has only two parameters: `Roundness` th
 
 ## Project Schedule
 I am currently a PhD student in Computer Science. During the whole period of the summer of code, I have no commitments and will be able to fully devote myself to the project .
-|||
+|__Period__|__Details__|
 |----------|----------|
-| Community Bonding Period | I will know my Mentors and I will improve my proposal according to their guidance. I will Familiarize with the Blender codebase also trying to solve small issues and trying to make small contributions. | 
-| Week 1-2 | I will design a parallel implementation of the algorithms. I think this should be done in an early stage because the usability of the tools relies an efficient and parallel implementation | 
-| Week 3-4 | I will define the interfaces and implement tests |
-| Week 5-8 | I will procede with the actual implementation of the modifiers |
-| Week 9-10| I will produce the documentation |
-| Week 11-12 | Buffer |
+| Community Bonding Period |<ul><li>I will know my Mentors and I will improve my proposal according to their guidance</li><li> I will also continue studying the Blender codebase and try to make small contributions to familiarize with the environment</li></ul> |
+| Week 1 - 6 | I will implement the operations (smooth booleans and rounding) using the Blender API. In this phase I will not deal with the UI yet, but I will implement the core functions using the BLI API and no other external dependency. This phase can be further subdivided into the following steps: <ul><li> <b>week 1: </b> Design of the interfaces and implementation of unit tests</li><li> <b>week 2-4: </b>Actual implementation of the functions</li><li> <b>week 5-6: </b>Data parallelization, using either CUDA (if available) or multithreading</li></ul>|
+| Week 7 - 8| Implementation of the UI. In this phase I will implement the new modifiers (Smooth Boolean and Rounding) and integrate them in the Blender UI. |
+| Week 9| Integration tests |
+| Week 10-11| I will produce the documentation and tutorials |
+| Week 12| Buffer |
 
 
 ## Bio
-I am a third year PhD student in Engineering in Computer Science at Sapienza University of Rome. I am mainly interested in Computer Graphics and Machine Learning, and actually I am working on differentiable rendering and image based surface reconstruction. I am experienced in C/C++, shader programming (OpenGL/GLSL), Python and CUDA.
+I am a third year PhD student in Engineering in Computer Science at Sapienza University of Rome. I am mainly interested in Computer Graphics and Machine Learning, and actually I am working on differentiable rendering and image based surface reconstruction. I am new to Blender development but I have experience in Computer Graphics and I am proficient in C/C++, shader programming (OpenGL/GLSL), Python and CUDA. I am also doing my best to get into the Blender codebase, to gain as much experience as possible before the start of the Summer of Code.
 In the past I mainly used Blender for research purposes, but its great number of features wet my appetite and I started to learn more about its use for content creation. It would be a great pleasure for me to contribute to this awsome software by having the opportunity to learn from experienced programmers.
